@@ -116,17 +116,31 @@ func isFUSE(dir string) bool {
 	return st.Type == fuseSuperMagic
 }
 
-func unmount(target string, flags int) error {
-	// For FUSE mounts, attempting to execute fusermount helper binary is preferred
-	// https://github.com/containerd/containerd/pull/3765#discussion_r342083514
-	if isFUSE(target) {
-		for _, helperBinary := range []string{"fusermount3", "fusermount"} {
-			cmd := exec.Command(helperBinary, "-u", target)
-			if err := cmd.Run(); err == nil {
-				return nil
-			}
-			// ignore error and try unix.Unmount
+// tryUnmountFUSE checks if target is a FUSE mount, and if so, attempts to unmount
+// using fusermount/fusermount3 helper binary. It returns an error if target is
+// not a FUSE mount, or if unmounting failed.
+//
+// For FUSE mounts, using these helper binaries is preferred, see:
+// https://github.com/containerd/containerd/pull/3765#discussion_r342083514
+func tryUnmountFUSE(target string) error {
+	if !isFUSE(target) {
+		return errors.New("not a FUSE mount")
+	}
+	var err error
+	for _, helperBinary := range []string{"fusermount3", "fusermount"} {
+		cmd := exec.Command(helperBinary, "-u", target)
+		err = cmd.Run()
+		if err == nil {
+			return nil
 		}
+	}
+	return err
+}
+
+func unmount(target string, flags int) error {
+	if err := tryUnmountFUSE(target); err == nil {
+		// unmount with fuse helper succeeded, so we're done
+		return nil
 	}
 	for i := 0; i < 50; i++ {
 		if err := unix.Unmount(target, flags); err != nil {
