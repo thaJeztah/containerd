@@ -88,7 +88,7 @@ jobs:
 
       - name: Install protobuf
         run: |
-          sudo env PATH=$PATH GOPATH=$GOPATH script/setup/install-protobuf
+          sudo -E env PATH=$PATH script/setup/install-protobuf
           sudo chmod +x /usr/local/bin/protoc
           sudo chmod og+rx /usr/local/include/google /usr/local/include/google/protobuf /usr/local/include/google/protobuf/compiler
           sudo chmod -R og+r /usr/local/include/google/protobuf/
@@ -278,8 +278,8 @@ jobs:
         env:
           CGO_ENABLED: 1
         run: |
-          make binaries
-          sudo make install
+          sudo -E PATH=$PATH make binaries
+          sudo -E PATH=$PATH make install
         working-directory: src/github.com/containerd/containerd
 
       - name: Integration 1
@@ -288,7 +288,7 @@ jobs:
           TEST_RUNTIME: ${{ matrix.runtime }}
           RUNC_FLAVOR: ${{ matrix.runc }}
         run: |
-          sudo GOPATH=$GOPATH GOPROXY=$GOPROXY TEST_RUNTIME=$TEST_RUNTIME RUNC_FLAVOR=$RUNC_FLAVOR make integration EXTRA_TESTFLAGS=-no-criu TESTFLAGS_RACE=-race
+          sudo -E PATH=$PATH make integration EXTRA_TESTFLAGS=-no-criu TESTFLAGS_RACE=-race
         working-directory: src/github.com/containerd/containerd
 
       # Run the integration suite a second time. See discussion in github.com/containerd/containerd/pull/1759
@@ -298,7 +298,7 @@ jobs:
           TEST_RUNTIME: ${{ matrix.runtime }}
           RUNC_FLAVOR: ${{ matrix.runc }}
         run: |
-          sudo GOPATH=$GOPATH GOPROXY=$GOPROXY TEST_RUNTIME=$TEST_RUNTIME RUNC_FLAVOR=$RUNC_FLAVOR TESTFLAGS_PARALLEL=1 make integration EXTRA_TESTFLAGS=-no-criu
+          sudo -E PATH=$PATH TESTFLAGS_PARALLEL=1 make integration EXTRA_TESTFLAGS=-no-criu
         working-directory: src/github.com/containerd/containerd
 
       - name: CRI Integration Test
@@ -319,9 +319,9 @@ jobs:
               runtime_type = "${TEST_RUNTIME}"
           EOF
           ls /etc/cni/net.d
-          sudo PATH=$PATH BDIR=$BDIR /usr/local/bin/containerd -a ${BDIR}/c.sock --config ${BDIR}/config.toml --root ${BDIR}/root --state ${BDIR}/state --log-level debug &> ${BDIR}/containerd-cri.log &
-          sudo PATH=$PATH BDIR=$BDIR /usr/local/bin/ctr -a ${BDIR}/c.sock version
-          sudo PATH=$PATH BDIR=$BDIR GOPATH=$GOPATH critest --runtime-endpoint=unix:///${BDIR}/c.sock --parallel=8
+          sudo -E PATH=$PATH BDIR=$BDIR /usr/local/bin/containerd -a ${BDIR}/c.sock --config ${BDIR}/config.toml --root ${BDIR}/root --state ${BDIR}/state --log-level debug &> ${BDIR}/containerd-cri.log &
+          sudo -E PATH=$PATH BDIR=$BDIR /usr/local/bin/ctr -a ${BDIR}/c.sock version
+          sudo -E PATH=$PATH BDIR=$BDIR critest --runtime-endpoint=unix:///${BDIR}/c.sock --parallel=8
           TEST_RC=$?
           test $TEST_RC -ne 0 && cat ${BDIR}/containerd-cri.log
           sudo pkill containerd
