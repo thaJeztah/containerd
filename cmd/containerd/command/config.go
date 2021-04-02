@@ -18,64 +18,47 @@ package command
 
 import (
 	gocontext "context"
-	"io"
 	"os"
-	"path/filepath"
 
-	"github.com/containerd/containerd/defaults"
-	"github.com/containerd/containerd/images"
+	"github.com/containerd/containerd/config"
 	"github.com/containerd/containerd/pkg/timeout"
 	"github.com/containerd/containerd/services/server"
 	srvconfig "github.com/containerd/containerd/services/server/config"
-	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/pelletier/go-toml"
 	"github.com/urfave/cli"
 )
 
-// Config is a wrapper of server config for printing out.
-type Config struct {
-	*srvconfig.Config
-	// Plugins overrides `Plugins map[string]toml.Tree` in server config.
-	Plugins map[string]interface{} `toml:"plugins"`
-}
-
-// WriteTo marshals the config to the provided writer
-func (c *Config) WriteTo(w io.Writer) (int64, error) {
-	return 0, toml.NewEncoder(w).Encode(c)
-}
-
 func outputConfig(cfg *srvconfig.Config) error {
-	config := &Config{
+	out := &config.File{
 		Config: cfg,
 	}
 
-	plugins, err := server.LoadPlugins(gocontext.Background(), config.Config)
+	plugins, err := server.LoadPlugins(gocontext.Background(), out.Config)
 	if err != nil {
 		return err
 	}
 	if len(plugins) != 0 {
-		config.Plugins = make(map[string]interface{})
+		out.Plugins = make(map[string]interface{})
 		for _, p := range plugins {
 			if p.Config == nil {
 				continue
 			}
 
-			pc, err := config.Decode(p)
+			pc, err := out.Decode(p)
 			if err != nil {
 				return err
 			}
 
-			config.Plugins[p.URI()] = pc
+			out.Plugins[p.URI()] = pc
 		}
 	}
 
-	if config.Timeouts == nil {
-		config.Timeouts = make(map[string]string)
+	if out.Timeouts == nil {
+		out.Timeouts = make(map[string]string)
 	}
 	timeouts := timeout.All()
 	for k, v := range timeouts {
-		if config.Timeouts[k] == "" {
-			config.Timeouts[k] = v.String()
+		if out.Timeouts[k] == "" {
+			out.Timeouts[k] = v.String()
 		}
 	}
 
@@ -83,12 +66,12 @@ func outputConfig(cfg *srvconfig.Config) error {
 	// when a config without a version is loaded from disk and has no version
 	// set, we assume it's a v1 config.  But when generating new configs via
 	// this command, generate the v2 config
-	config.Config.Version = 2
+	out.Config.Version = 2
 
 	// remove overridden Plugins type to avoid duplication in output
-	config.Config.Plugins = nil
+	out.Config.Plugins = nil
 
-	_, err = config.WriteTo(os.Stdout)
+	_, err = out.WriteTo(os.Stdout)
 	return err
 }
 
@@ -100,14 +83,14 @@ var configCommand = cli.Command{
 			Name:  "default",
 			Usage: "see the output of the default config",
 			Action: func(context *cli.Context) error {
-				return outputConfig(defaultConfig())
+				return outputConfig(config.Default())
 			},
 		},
 		{
 			Name:  "dump",
 			Usage: "see the output of the final main config with imported in subconfig files",
 			Action: func(context *cli.Context) error {
-				config := defaultConfig()
+				config := config.Default()
 				if err := srvconfig.LoadConfig(context.GlobalString("config"), config); err != nil && !os.IsNotExist(err) {
 					return err
 				}
@@ -116,50 +99,4 @@ var configCommand = cli.Command{
 			},
 		},
 	},
-}
-
-func platformAgnosticDefaultConfig() *srvconfig.Config {
-	return &srvconfig.Config{
-		Version: 1,
-		Root:    defaults.DefaultRootDir,
-		State:   defaults.DefaultStateDir,
-		GRPC: srvconfig.GRPCConfig{
-			Address:        defaults.DefaultAddress,
-			MaxRecvMsgSize: defaults.DefaultMaxRecvMsgSize,
-			MaxSendMsgSize: defaults.DefaultMaxSendMsgSize,
-		},
-		DisabledPlugins:  []string{},
-		RequiredPlugins:  []string{},
-		StreamProcessors: streamProcessors(),
-	}
-}
-
-func streamProcessors() map[string]srvconfig.StreamProcessor {
-	const (
-		ctdDecoder = "ctd-decoder"
-		basename   = "io.containerd.ocicrypt.decoder.v1"
-	)
-	decryptionKeysPath := filepath.Join(defaults.DefaultConfigDir, "ocicrypt", "keys")
-	ctdDecoderArgs := []string{
-		"--decryption-keys-path", decryptionKeysPath,
-	}
-	ctdDecoderEnv := []string{
-		"OCICRYPT_KEYPROVIDER_CONFIG=" + filepath.Join(defaults.DefaultConfigDir, "ocicrypt", "ocicrypt_keyprovider.conf"),
-	}
-	return map[string]srvconfig.StreamProcessor{
-		basename + ".tar.gzip": {
-			Accepts: []string{images.MediaTypeImageLayerGzipEncrypted},
-			Returns: ocispec.MediaTypeImageLayerGzip,
-			Path:    ctdDecoder,
-			Args:    ctdDecoderArgs,
-			Env:     ctdDecoderEnv,
-		},
-		basename + ".tar": {
-			Accepts: []string{images.MediaTypeImageLayerEncrypted},
-			Returns: ocispec.MediaTypeImageLayer,
-			Path:    ctdDecoder,
-			Args:    ctdDecoderArgs,
-			Env:     ctdDecoderEnv,
-		},
-	}
 }

@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package command
+package config
 
 import (
 	srvconfig "github.com/containerd/containerd/services/server/config"

@@ -27,6 +27,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/containerd/containerd/config"
 	"github.com/containerd/containerd/defaults"
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/log"
@@ -112,7 +113,7 @@ can be used and modified as necessary as a custom configuration.`
 			signals = make(chan os.Signal, 2048)
 			serverC = make(chan *server.Server, 1)
 			ctx     = gocontext.Background()
-			config  = defaultConfig()
+			cfg     = config.Default()
 		)
 
 		// Only try to load the config if it either exists, or the user explicitly
@@ -120,23 +121,23 @@ can be used and modified as necessary as a custom configuration.`
 		configPath := context.GlobalString("config")
 		_, err := os.Stat(configPath)
 		if !os.IsNotExist(err) || context.GlobalIsSet("config") {
-			if err := srvconfig.LoadConfig(configPath, config); err != nil {
+			if err := srvconfig.LoadConfig(configPath, cfg); err != nil {
 				return err
 			}
 		}
 
 		// Apply flags to the config
-		if err := applyFlags(context, config); err != nil {
+		if err := applyFlags(context, cfg); err != nil {
 			return err
 		}
 
 		// Make sure top-level directories are created early.
-		if err := server.CreateTopLevelDirectories(config); err != nil {
+		if err := server.CreateTopLevelDirectories(cfg); err != nil {
 			return err
 		}
 
 		// Stop if we are registering or unregistering against Windows SCM.
-		stop, err := registerUnregisterService(config.Root)
+		stop, err := registerUnregisterService(cfg.Root)
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -150,7 +151,7 @@ can be used and modified as necessary as a custom configuration.`
 		signal.Notify(signals, handledSignals...)
 
 		// cleanup temp mounts
-		if err := mount.SetTempMountLocation(filepath.Join(config.Root, "tmpmounts")); err != nil {
+		if err := mount.SetTempMountLocation(filepath.Join(cfg.Root, "tmpmounts")); err != nil {
 			return errors.Wrap(err, "creating temp mount location")
 		}
 		// unmount all temp mounts on boot for the server
@@ -162,21 +163,21 @@ can be used and modified as necessary as a custom configuration.`
 			log.G(ctx).WithError(w).Warn("cleanup temp mount")
 		}
 
-		if config.GRPC.Address == "" {
+		if cfg.GRPC.Address == "" {
 			return errors.Wrap(errdefs.ErrInvalidArgument, "grpc address cannot be empty")
 		}
-		if config.TTRPC.Address == "" {
+		if cfg.TTRPC.Address == "" {
 			// If TTRPC was not explicitly configured, use defaults based on GRPC.
-			config.TTRPC.Address = fmt.Sprintf("%s.ttrpc", config.GRPC.Address)
-			config.TTRPC.UID = config.GRPC.UID
-			config.TTRPC.GID = config.GRPC.GID
+			cfg.TTRPC.Address = fmt.Sprintf("%s.ttrpc", cfg.GRPC.Address)
+			cfg.TTRPC.UID = cfg.GRPC.UID
+			cfg.TTRPC.GID = cfg.GRPC.GID
 		}
 		log.G(ctx).WithFields(logrus.Fields{
 			"version":  version.Version,
 			"revision": version.Revision,
 		}).Info("starting containerd")
 
-		server, err := server.New(ctx, config)
+		server, err := server.New(ctx, cfg)
 		if err != nil {
 			return err
 		}
@@ -188,42 +189,42 @@ can be used and modified as necessary as a custom configuration.`
 
 		serverC <- server
 
-		if config.Debug.Address != "" {
+		if cfg.Debug.Address != "" {
 			var l net.Listener
-			if filepath.IsAbs(config.Debug.Address) {
-				if l, err = sys.GetLocalListener(config.Debug.Address, config.Debug.UID, config.Debug.GID); err != nil {
+			if filepath.IsAbs(cfg.Debug.Address) {
+				if l, err = sys.GetLocalListener(cfg.Debug.Address, cfg.Debug.UID, cfg.Debug.GID); err != nil {
 					return errors.Wrapf(err, "failed to get listener for debug endpoint")
 				}
 			} else {
-				if l, err = net.Listen("tcp", config.Debug.Address); err != nil {
+				if l, err = net.Listen("tcp", cfg.Debug.Address); err != nil {
 					return errors.Wrapf(err, "failed to get listener for debug endpoint")
 				}
 			}
 			serve(ctx, l, server.ServeDebug)
 		}
-		if config.Metrics.Address != "" {
-			l, err := net.Listen("tcp", config.Metrics.Address)
+		if cfg.Metrics.Address != "" {
+			l, err := net.Listen("tcp", cfg.Metrics.Address)
 			if err != nil {
 				return errors.Wrapf(err, "failed to get listener for metrics endpoint")
 			}
 			serve(ctx, l, server.ServeMetrics)
 		}
 		// setup the ttrpc endpoint
-		tl, err := sys.GetLocalListener(config.TTRPC.Address, config.TTRPC.UID, config.TTRPC.GID)
+		tl, err := sys.GetLocalListener(cfg.TTRPC.Address, cfg.TTRPC.UID, cfg.TTRPC.GID)
 		if err != nil {
 			return errors.Wrapf(err, "failed to get listener for main ttrpc endpoint")
 		}
 		serve(ctx, tl, server.ServeTTRPC)
 
-		if config.GRPC.TCPAddress != "" {
-			l, err := net.Listen("tcp", config.GRPC.TCPAddress)
+		if cfg.GRPC.TCPAddress != "" {
+			l, err := net.Listen("tcp", cfg.GRPC.TCPAddress)
 			if err != nil {
 				return errors.Wrapf(err, "failed to get listener for TCP grpc endpoint")
 			}
 			serve(ctx, l, server.ServeTCP)
 		}
 		// setup the main grpc endpoint
-		l, err := sys.GetLocalListener(config.GRPC.Address, config.GRPC.UID, config.GRPC.GID)
+		l, err := sys.GetLocalListener(cfg.GRPC.Address, cfg.GRPC.UID, cfg.GRPC.GID)
 		if err != nil {
 			return errors.Wrapf(err, "failed to get listener for main endpoint")
 		}

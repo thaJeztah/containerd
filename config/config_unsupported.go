@@ -16,7 +16,7 @@
    limitations under the License.
 */
 
-package command
+package config
 
 import (
 	"github.com/containerd/containerd/defaults"
