@@ -66,6 +66,9 @@ require (
 )
 
 replace (
+	// Cut circular dependency tree: always use local version of containerd to resolve dependencies
+	github.com/containerd/containerd => ./
+
 	// Ignore the rules below, they're to simplify the reproducer
 	github.com/prometheus/procfs => github.com/prometheus/procfs v0.2.0
 	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
