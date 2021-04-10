@@ -65,12 +65,8 @@ require (
 	k8s.io/utils v0.0.0-20201110183641-67b214c5f920
 )
 
-// When updating replace rules, make sure to also update the rules in integration/client/go.mod
 replace (
-	github.com/gogo/googleapis => github.com/gogo/googleapis v1.3.2
-	github.com/golang/protobuf => github.com/golang/protobuf v1.3.5
-	// urfave/cli must be <= v1.22.1 due to a regression: https://github.com/urfave/cli/issues/1092
-	github.com/urfave/cli => github.com/urfave/cli v1.22.1
-	google.golang.org/genproto => google.golang.org/genproto v0.0.0-20200224152610-e50cd9704f63
-	google.golang.org/grpc => google.golang.org/grpc v1.27.1
+	// Ignore the rules below, they're to simplify the reproducer
+	github.com/prometheus/procfs => github.com/prometheus/procfs v0.2.0
+	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
 )
