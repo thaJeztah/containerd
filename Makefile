@@ -156,7 +156,11 @@ generate: protos
 
 protos: bin/protoc-gen-gogoctrd ## generate protobuf
 	@echo "$(WHALE) $@"
+	$(eval TMPDIR := $(shell mktemp -d))
+	# protoc does not like that we vendor/-ed in the api
+	@mv vendor/github.com/containerd/containerd/api $(TMPDIR)
 	@PATH="${ROOTDIR}/bin:${PATH}" protobuild --quiet ${PACKAGES}
+	@mv $(TMPDIR)/api vendor/github.com/containerd/containerd/
 
 check-protos: protos ## check if protobufs needs to be generated again
 	@echo "$(WHALE) $@"
@@ -400,10 +404,13 @@ root-coverage: ## generate coverage profiles for unit tests that require root
 		fi; \
 	done )
 
-vendor: ## vendor
+vendor: ## ensure all the go.mod/go.sum files are up-to-date including vendor/ directory
 	@echo "$(WHALE) $@"
-	@$(GO) mod tidy
-	@$(GO) mod vendor
+	script/build/update-gomod.sh
+
+verify-vendor: ## verify if all the go.mod/go.sum files are up-to-date
+	@echo "$(WHALE) $@"
+	script/build/verify-gomod.sh
 
 help: ## this help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
