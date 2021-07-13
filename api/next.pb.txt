@@ -29,7 +29,7 @@ file {
   syntax: "proto3"
 }
 file {
-  name: "github.com/containerd/containerd/protobuf/plugin/fieldpath.proto"
+  name: "github.com/containerd/containerd/api/protobuf/plugin/fieldpath.proto"
   package: "containerd.plugin"
   dependency: "google/protobuf/descriptor.proto"
   extension {
@@ -54,7 +54,7 @@ file {
   package: "containerd.events"
   dependency: "google/protobuf/any.proto"
   dependency: "gogoproto/gogo.proto"
-  dependency: "github.com/containerd/containerd/protobuf/plugin/fieldpath.proto"
+  dependency: "github.com/containerd/containerd/api/protobuf/plugin/fieldpath.proto"
   message_type {
     name: "ContainerCreate"
     field {
@@ -172,7 +172,7 @@ file {
   name: "github.com/containerd/containerd/api/events/content.proto"
   package: "containerd.events"
   dependency: "gogoproto/gogo.proto"
-  dependency: "github.com/containerd/containerd/protobuf/plugin/fieldpath.proto"
+  dependency: "github.com/containerd/containerd/api/protobuf/plugin/fieldpath.proto"
   message_type {
     name: "ContentDelete"
     field {
@@ -198,7 +198,7 @@ file {
 file {
   name: "github.com/containerd/containerd/api/events/image.proto"
   package: "containerd.services.images.v1"
-  dependency: "github.com/containerd/containerd/protobuf/plugin/fieldpath.proto"
+  dependency: "github.com/containerd/containerd/api/protobuf/plugin/fieldpath.proto"
   message_type {
     name: "ImageCreate"
     field {
@@ -296,7 +296,7 @@ file {
   name: "github.com/containerd/containerd/api/events/namespace.proto"
   package: "containerd.events"
   dependency: "gogoproto/gogo.proto"
-  dependency: "github.com/containerd/containerd/protobuf/plugin/fieldpath.proto"
+  dependency: "github.com/containerd/containerd/api/protobuf/plugin/fieldpath.proto"
   message_type {
     name: "NamespaceCreate"
     field {
@@ -394,7 +394,7 @@ file {
 file {
   name: "github.com/containerd/containerd/api/events/snapshot.proto"
   package: "containerd.events"
-  dependency: "github.com/containerd/containerd/protobuf/plugin/fieldpath.proto"
+  dependency: "github.com/containerd/containerd/api/protobuf/plugin/fieldpath.proto"
   message_type {
     name: "SnapshotPrepare"
     field {
@@ -524,7 +524,7 @@ file {
   dependency: "gogoproto/gogo.proto"
   dependency: "google/protobuf/timestamp.proto"
   dependency: "github.com/containerd/containerd/api/types/mount.proto"
-  dependency: "github.com/containerd/containerd/protobuf/plugin/fieldpath.proto"
+  dependency: "github.com/containerd/containerd/api/protobuf/plugin/fieldpath.proto"
   message_type {
     name: "TaskCreate"
     field {
@@ -1967,7 +1967,7 @@ file {
 file {
   name: "github.com/containerd/containerd/api/services/events/v1/events.proto"
   package: "containerd.services.events.v1"
-  dependency: "github.com/containerd/containerd/protobuf/plugin/fieldpath.proto"
+  dependency: "github.com/containerd/containerd/api/protobuf/plugin/fieldpath.proto"
   dependency: "gogoproto/gogo.proto"
   dependency: "google/protobuf/any.proto"
   dependency: "google/protobuf/empty.proto"
@@ -4403,7 +4403,7 @@ file {
 file {
   name: "github.com/containerd/containerd/api/services/ttrpc/events/v1/events.proto"
   package: "containerd.services.events.ttrpc.v1"
-  dependency: "github.com/containerd/containerd/protobuf/plugin/fieldpath.proto"
+  dependency: "github.com/containerd/containerd/api/protobuf/plugin/fieldpath.proto"
   dependency: "gogoproto/gogo.proto"
   dependency: "google/protobuf/any.proto"
   dependency: "google/protobuf/empty.proto"
