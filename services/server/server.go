@@ -41,7 +41,7 @@ import (
 	"github.com/containerd/containerd/defaults"
 	"github.com/containerd/containerd/diff"
 	diffproxy "github.com/containerd/containerd/diff/proxy"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/pkg/dialer"
 	"github.com/containerd/containerd/pkg/timeout"
 	"github.com/containerd/containerd/platforms"

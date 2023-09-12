@@ -30,8 +30,8 @@ import (
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/log/logtest"
 	"github.com/containerd/containerd/pkg/testutil"
+	"github.com/containerd/log/logtest"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/stretchr/testify/assert"
@@ -1050,9 +1050,9 @@ func checkStatus(t *testing.T, w content.Writer, expected content.Status, d dige
 	}
 
 	// TODO: Add this test once all implementations guarantee this value is held
-	//if st.Expected != expected.Expected {
+	// if st.Expected != expected.Expected {
 	//	t.Fatalf("unexpected \"expected digest\" %q, expected %q", st.Expected, expected.Expected)
-	//}
+	// }
 
 	// FIXME: broken on windows: unexpected updated at time 2017-11-14 13:43:22.178013 -0800 PST,
 	// expected between 2017-11-14 13:43:22.1790195 -0800 PST m=+1.022137300 and

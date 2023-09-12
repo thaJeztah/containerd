@@ -26,7 +26,7 @@ import (
 	"sync"
 
 	transfertypes "github.com/containerd/containerd/api/types/transfer"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/pkg/streaming"
 	"github.com/containerd/containerd/pkg/transfer"
 	"github.com/containerd/containerd/pkg/transfer/plugins"

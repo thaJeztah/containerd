@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	imagestore "github.com/containerd/containerd/pkg/cri/store/image"
 	"github.com/containerd/containerd/tracing"
 	docker "github.com/distribution/reference"

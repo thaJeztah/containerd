@@ -27,7 +27,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/sys/reaper"
 	"github.com/containerd/fifo"
 	"github.com/sirupsen/logrus"

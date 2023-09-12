@@ -26,7 +26,7 @@ import (
 	"github.com/containerd/containerd/events"
 	"github.com/containerd/containerd/filters"
 	"github.com/containerd/containerd/identifiers"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/namespaces"
 	"github.com/containerd/typeurl/v2"
 	goevents "github.com/docker/go-events"

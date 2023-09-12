@@ -23,7 +23,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	google_protobuf "github.com/containerd/containerd/protobuf/types"
 	runc "github.com/containerd/go-runc"
 )

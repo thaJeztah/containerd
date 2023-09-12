@@ -25,7 +25,7 @@ import (
 	"github.com/containerd/containerd/events"
 	"github.com/containerd/containerd/gc"
 	"github.com/containerd/containerd/images"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/metadata"
 	"github.com/containerd/containerd/pkg/epoch"
 	"github.com/containerd/containerd/plugin"

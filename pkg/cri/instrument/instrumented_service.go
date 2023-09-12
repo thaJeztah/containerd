@@ -21,7 +21,7 @@ import (
 	"errors"
 
 	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/tracing"
 	runtime "k8s.io/cri-api/pkg/apis/runtime/v1"
 

@@ -21,6 +21,8 @@ require (
 	golang.org/x/sys v0.10.0
 )
 
+require github.com/containerd/log v0.1.0
+
 require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/AdamKorcz/go-118-fuzz-build v0.0.0-20230306123547-8075edf89bb0 // indirect

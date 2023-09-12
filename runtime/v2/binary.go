@@ -26,7 +26,7 @@ import (
 	gruntime "runtime"
 
 	"github.com/containerd/containerd/api/runtime/task/v2"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/namespaces"
 	"github.com/containerd/containerd/protobuf"
 	"github.com/containerd/containerd/protobuf/proto"

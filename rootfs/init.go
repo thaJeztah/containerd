@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/mount"
 	"github.com/containerd/containerd/snapshots"
 	digest "github.com/opencontainers/go-digest"

@@ -36,11 +36,11 @@ import (
 	"github.com/containerd/containerd/gc"
 	"github.com/containerd/containerd/images"
 	"github.com/containerd/containerd/leases"
-	"github.com/containerd/containerd/log/logtest"
 	"github.com/containerd/containerd/namespaces"
 	"github.com/containerd/containerd/protobuf/types"
 	"github.com/containerd/containerd/snapshots"
 	"github.com/containerd/containerd/snapshots/native"
+	"github.com/containerd/log/logtest"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/stretchr/testify/assert"
@@ -527,7 +527,7 @@ func benchmarkTrigger(n int) func(b *testing.B) {
 
 		// TODO: reset benchmark
 		b.ResetTimer()
-		//b.StopTimer()
+		// b.StopTimer()
 
 		labels := pprof.Labels("worker", "trigger")
 		pprof.Do(ctx, labels, func(ctx context.Context) {
@@ -535,17 +535,17 @@ func benchmarkTrigger(n int) func(b *testing.B) {
 
 				// TODO: Add removal objects
 
-				//b.StartTimer()
+				// b.StartTimer()
 
 				if _, err := mdb.GarbageCollect(ctx); err != nil {
 					b.Fatal(err)
 				}
 
-				//b.StopTimer()
+				// b.StopTimer()
 
-				//var actual []gc.Node
+				// var actual []gc.Node
 
-				//if err := db.View(func(tx *bolt.Tx) error {
+				// if err := db.View(func(tx *bolt.Tx) error {
 				//	nodeC := make(chan gc.Node)
 				//	var scanErr error
 				//	go func() {
@@ -556,11 +556,11 @@ func benchmarkTrigger(n int) func(b *testing.B) {
 				//		actual = append(actual, node)
 				//	}
 				//	return scanErr
-				//}); err != nil {
+				// }); err != nil {
 				//	t.Fatal(err)
-				//}
+				// }
 
-				//checkNodesEqual(t, actual, remaining)
+				// checkNodesEqual(t, actual, remaining)
 			}
 		})
 	}

@@ -29,7 +29,7 @@ import (
 	"github.com/containerd/containerd/api/services/tasks/v1"
 	"github.com/containerd/containerd/api/types"
 	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/pkg/cri/store/stats"
 	"github.com/containerd/containerd/protobuf"
 	"github.com/containerd/typeurl/v2"

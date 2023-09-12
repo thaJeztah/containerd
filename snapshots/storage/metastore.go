@@ -27,7 +27,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/snapshots"
 	bolt "go.etcd.io/bbolt"
 )

@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/containerd/containerd/content"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/pkg/transfer"
 	"github.com/containerd/containerd/remotes"
 	"github.com/opencontainers/go-digest"

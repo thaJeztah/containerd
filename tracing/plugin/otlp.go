@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/plugin"
 	"github.com/containerd/containerd/tracing"
 	"github.com/sirupsen/logrus"

@@ -23,7 +23,7 @@ import (
 	"runtime"
 
 	"github.com/containerd/containerd/api/types"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/pkg/shutdown"
 	"github.com/containerd/containerd/runtime/v2/shim"
 	"github.com/containerd/ttrpc"

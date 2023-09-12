@@ -31,11 +31,11 @@ import (
 	"github.com/containerd/containerd/cmd/ctr/commands"
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/diff"
-	"github.com/containerd/containerd/log"
 	"github.com/containerd/containerd/mount"
 	"github.com/containerd/containerd/pkg/progress"
 	"github.com/containerd/containerd/rootfs"
 	"github.com/containerd/containerd/snapshots"
+	"github.com/containerd/log"
 	digest "github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/urfave/cli"
@@ -568,7 +568,7 @@ var unpackCommand = cli.Command{
 			return errors.New("manifest not found")
 		}
 		// TODO: Get rootfs from Image
-		//log.G(ctx).Infof("chain ID: %s", chainID.String())
+		// log.G(ctx).Infof("chain ID: %s", chainID.String())
 		return nil
 	},
 }

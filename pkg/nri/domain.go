@@ -22,7 +22,7 @@ import (
 	"sync"
 
 	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/namespaces"
 	nri "github.com/containerd/nri/pkg/adaptation"
 )

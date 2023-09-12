@@ -31,7 +31,7 @@ import (
 
 	shimapi "github.com/containerd/containerd/api/runtime/task/v2"
 	"github.com/containerd/containerd/events"
-	"github.com/containerd/containerd/log"
+	"github.com/containerd/log"
 	"github.com/containerd/containerd/namespaces"
 	"github.com/containerd/containerd/pkg/shutdown"
 	"github.com/containerd/containerd/plugin"
