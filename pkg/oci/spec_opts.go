@@ -1589,6 +1589,19 @@ func WithRdt(closID, l3CacheSchema, memBwSchema string) SpecOpts {
 	}
 }
 
+// WithWindowsCPUGroupAffinity sets the CPU affinity values in runtime spec for windows.
+func WithWindowsCPUGroupAffinity(affinityCPUs []specs.WindowsCPUGroupAffinity) SpecOpts {
+	return func(_ context.Context, _ Client, c *containers.Container, s *Spec) error {
+		// We would expect the Windows and Resources struct to be setup by now
+		if len(affinityCPUs) == 0 || s.Windows == nil {
+			return nil
+		}
+		setCPUWindows(s)
+		s.Windows.Resources.CPU.Affinity = append(s.Windows.Resources.CPU.Affinity, affinityCPUs...)
+		return nil
+	}
+}
+
 // WithWindowsCPUCount sets the `Windows.Resources.CPU.Count` section to the
 // `count` specified.
 func WithWindowsCPUCount(count uint64) SpecOpts {
