@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
@@ -134,8 +135,16 @@ func defaultUnixCaps() []string {
 	}
 }
 
+var supportsTimeNamespace = sync.OnceValue(func() bool {
+	if runtime.GOOS != "linux" {
+		return false
+	}
+	_, err := os.Lstat("/proc/self/ns/time")
+	return err == nil
+})
+
 func defaultUnixNamespaces() []specs.LinuxNamespace {
-	return []specs.LinuxNamespace{
+	ns := []specs.LinuxNamespace{
 		{
 			Type: specs.PIDNamespace,
 		},
@@ -152,6 +161,10 @@ func defaultUnixNamespaces() []specs.LinuxNamespace {
 			Type: specs.NetworkNamespace,
 		},
 	}
+	if supportsTimeNamespace() {
+		ns = append(ns, specs.LinuxNamespace{Type: specs.TimeNamespace})
+	}
+	return ns
 }
 
 func populateDefaultUnixSpec(ctx context.Context, s *Spec, id string) error {
