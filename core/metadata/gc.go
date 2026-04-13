@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"sort"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -402,8 +402,8 @@ func startGCContext(ctx context.Context, collectors map[gc.ResourceType]Collecto
 			contexts[rt] = c
 		}
 		// Sort labelHandlers to ensure key seeking is always forward
-		sort.Slice(labelHandlers, func(i, j int) bool {
-			return bytes.Compare(labelHandlers[i].key, labelHandlers[j].key) < 0
+		slices.SortFunc(labelHandlers, func(a, b referenceLabelHandler) int {
+			return bytes.Compare(a.key, b.key)
 		})
 	}
 	return &gcContext{
