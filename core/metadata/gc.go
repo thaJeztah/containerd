@@ -1059,23 +1059,24 @@ func (c *gcContext) remove(ctx context.Context, tx *bolt.Tx, node gc.Node) (any,
 
 // sendLabelRefs sends all snapshot and content references referred to by the labels in the bkt
 func (c *gcContext) sendLabelRefs(ns string, bkt *bolt.Bucket, cb labelRefCallbacks) error {
-	lbkt := bkt.Bucket(bucketKeyObjectLabels)
-	if lbkt != nil {
+	if lbkt := bkt.Bucket(bucketKeyObjectLabels); lbkt != nil {
 		lc := lbkt.Cursor()
-		for i := range c.labelHandlers {
-			if (cb.bref == nil && c.labelHandlers[i].bref != nil) || (cb.fn == nil && c.labelHandlers[i].fn != nil) || (cb.cond == nil && c.labelHandlers[i].condition != nil) || (cb.condVal == nil && c.labelHandlers[i].conditionalV != nil) {
+		for _, h := range c.labelHandlers {
+			if (cb.bref == nil && h.bref != nil) || (cb.fn == nil && h.fn != nil) || (cb.cond == nil && h.condition != nil) || (cb.condVal == nil && h.conditionalV != nil) {
 				continue
 			}
-			for k, v := lc.Seek(c.labelHandlers[i].key); k != nil && bytes.HasPrefix(k, c.labelHandlers[i].key); k, v = lc.Next() {
-				if c.labelHandlers[i].fn != nil {
-					c.labelHandlers[i].fn(ns, k, v, cb.fn)
-				} else if c.labelHandlers[i].bref != nil {
-					c.labelHandlers[i].bref(ns, k, v, cb.bref)
-				} else if c.labelHandlers[i].condition != nil {
-					c.labelHandlers[i].condition(ns, k, v, cb.cond)
-				} else if c.labelHandlers[i].conditionalV != nil {
-					c.labelHandlers[i].conditionalV(ns, k, v, cb.condVal)
-				} else if cb.root != nil {
+
+			for k, v := lc.Seek(h.key); k != nil && bytes.HasPrefix(k, h.key); k, v = lc.Next() {
+				switch {
+				case h.fn != nil:
+					h.fn(ns, k, v, cb.fn)
+				case h.bref != nil:
+					h.bref(ns, k, v, cb.bref)
+				case h.condition != nil:
+					h.condition(ns, k, v, cb.cond)
+				case h.conditionalV != nil:
+					h.conditionalV(ns, k, v, cb.condVal)
+				case cb.root != nil:
 					cb.root()
 				}
 			}
