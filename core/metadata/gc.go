@@ -525,8 +525,11 @@ func (c *gcContext) scanRoots(ctx context.Context, tx *bolt.Tx, nc chan<- gc.Nod
 					return nil
 				}
 				libkt := lbkt.Bucket(k)
-				var flat bool
+				if libkt == nil {
+					return nil
+				}
 
+				var flat bool
 				if lblbkt := libkt.Bucket(bucketKeyObjectLabels); lblbkt != nil {
 					if expV := lblbkt.Get(labelGCExpire); expV != nil {
 						if exp, err := time.Parse(time.RFC3339, string(expV)); err != nil {
@@ -574,6 +577,9 @@ func (c *gcContext) scanRoots(ctx context.Context, tx *bolt.Tx, nc chan<- gc.Nod
 							return nil
 						}
 						snbkt := sbkt.Bucket(sk)
+						if snbkt == nil {
+							return nil
+						}
 
 						return snbkt.ForEach(func(k, v []byte) error {
 							fn(gcnode(stype, ns, fmt.Sprintf("%s/%s", sk, k)))
@@ -620,19 +626,7 @@ func (c *gcContext) scanRoots(ctx context.Context, tx *bolt.Tx, nc chan<- gc.Nod
 					return nil
 				}
 
-				if !isExpiredImage(ctx, k, ibkt.Bucket(k), expThreshold) {
-					fn(gcnode(ResourceImage, ns, string(k)))
-					// Non-expired images are roots, so regular fn/bref refs are
-					// not needed here — they are followed during graph traversal
-					// via references(). Only conditional refs need processing at
-					// scan time since conditions are collected during scan and
-					// evaluated after all values have been gathered.
-					return c.sendLabelRefs(ns, ibkt.Bucket(k), labelRefCallbacks{
-						cond: func(n gc.Node, cv func(conditionalValue) bool) {
-							addCond(gcnode(ResourceImage, ns, string(k)), n, cv)
-						},
-					})
-				} else {
+				if isExpiredImage(ctx, k, ibkt.Bucket(k), expThreshold) {
 					// If the image is expired, still allow it to be referenced from
 					// other resources, the back references are not relevant if the object
 					// is not expired since it is already a root object.
@@ -644,9 +638,19 @@ func (c *gcContext) scanRoots(ctx context.Context, tx *bolt.Tx, nc chan<- gc.Nod
 							addCond(gcnode(ResourceImage, ns, string(k)), n, cv)
 						},
 					})
-
 				}
 
+				fn(gcnode(ResourceImage, ns, string(k)))
+				// Non-expired images are roots, so regular fn/bref refs are
+				// not needed here — they are followed during graph traversal
+				// via references(). Only conditional refs need processing at
+				// scan time since conditions are collected during scan and
+				// evaluated after all values have been gathered.
+				return c.sendLabelRefs(ns, ibkt.Bucket(k), labelRefCallbacks{
+					cond: func(n gc.Node, cv func(conditionalValue) bool) {
+						addCond(gcnode(ResourceImage, ns, string(k)), n, cv)
+					},
+				})
 			}); err != nil {
 				return err
 			}
@@ -719,6 +723,10 @@ func (c *gcContext) scanRoots(ctx context.Context, tx *bolt.Tx, nc chan<- gc.Nod
 				}
 
 				snbkt := sbkt.Bucket(sk)
+				if snbkt == nil {
+					return nil
+				}
+
 				return snbkt.ForEach(func(k, v []byte) error {
 					if v != nil {
 						return nil
@@ -747,9 +755,7 @@ func (c *gcContext) scanRoots(ctx context.Context, tx *bolt.Tx, nc chan<- gc.Nod
 					return nil
 				}
 
-				sbbkt := bbkt.Bucket(k)
-
-				return c.sendLabelRefs(ns, sbbkt, labelRefCallbacks{fn: fn})
+				return c.sendLabelRefs(ns, bbkt.Bucket(k), labelRefCallbacks{fn: fn})
 			}); err != nil {
 				return err
 			}
@@ -881,8 +887,11 @@ func (c *gcContext) scanAll(ctx context.Context, tx *bolt.Tx, fn func(ctx contex
 			continue
 		}
 		nbkt := v1bkt.Bucket(k)
-		ns := string(k)
+		if nbkt == nil {
+			continue
+		}
 
+		ns := string(k)
 		if lbkt := nbkt.Bucket(bucketKeyObjectLeases); lbkt != nil {
 			if err := lbkt.ForEach(func(k, v []byte) error {
 				if v != nil {
@@ -1027,6 +1036,10 @@ func (c *gcContext) remove(ctx context.Context, tx *bolt.Tx, node gc.Node) (any,
 
 // sendLabelRefs sends all snapshot and content references referred to by the labels in the bkt
 func (c *gcContext) sendLabelRefs(ns string, bkt *bolt.Bucket, cb labelRefCallbacks) error {
+	if bkt == nil {
+		return nil
+	}
+
 	if lbkt := bkt.Bucket(bucketKeyObjectLabels); lbkt != nil {
 		lc := lbkt.Cursor()
 		for _, h := range c.labelHandlers {
@@ -1054,6 +1067,9 @@ func (c *gcContext) sendLabelRefs(ns string, bkt *bolt.Bucket, cb labelRefCallba
 }
 
 func isExpiredImage(ctx context.Context, k []byte, bkt *bolt.Bucket, expThreshold time.Time) bool {
+	if bkt == nil {
+		return false
+	}
 	if lbkt := bkt.Bucket(bucketKeyObjectLabels); lbkt != nil {
 		if el := lbkt.Get(labelGCExpire); el != nil {
 			exp, err := time.Parse(time.RFC3339, string(el))
