@@ -114,22 +114,22 @@ func cleanProfileName(profile string) string {
 	return profile
 }
 
-func loadData(name string) (*data, error) {
+func loadData(name string, macroExistsFn func(string) bool) (*data, error) {
 	p := data{
 		Name: name,
 	}
 
 	const abi = "abi/3.0"
-	if macroExists(abi) {
+	if macroExistsFn(abi) {
 		p.Abi = abi
 	}
 
-	if macroExists("tunables/global") {
+	if macroExistsFn("tunables/global") {
 		p.Imports = append(p.Imports, "#include <tunables/global>")
 	} else {
 		p.Imports = append(p.Imports, "@{PROC}=/proc/")
 	}
-	if macroExists("abstractions/base") {
+	if macroExistsFn("abstractions/base") {
 		p.InnerImports = append(p.InnerImports, "#include <abstractions/base>")
 	}
 
