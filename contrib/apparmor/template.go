@@ -107,7 +107,7 @@ type data struct {
 func cleanProfileName(profile string) string {
 	// Normally profiles are suffixed by " (enforce)". AppArmor profiles cannot
 	// contain spaces so this doesn't restrict daemon profile names.
-	profile, _, _ = strings.Cut(profile, " ")
+	profile, _, _ = strings.Cut(strings.TrimSpace(profile), " ")
 	if profile == "" {
 		profile = "unconfined"
 	}
